@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build Outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Logs & Runtime Data
+logs/
+*.log
+npm-debug.log*
+
+# Testing & Coverage
+coverage/
+.vitest/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
