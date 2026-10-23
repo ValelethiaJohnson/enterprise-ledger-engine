@@ -1,0 +1,46 @@
+name: Enterprise CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build-and-verify:
+    name: Build, Prisma & Type Verification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: |
+          if [ -f package.json ]; then
+            npm install --no-audit --no-fund
+          fi
+
+      - name: Generate Prisma Client & Validate Schema
+        run: |
+          if [ -f prisma/schema.prisma ]; then
+            npx prisma generate
+          fi
+
+      - name: Verify TypeScript Compilation
+        run: |
+          if [ -f tsconfig.json ] && [ -d src ]; then
+            npx tsc --noEmit
+          fi
+
+      - name: Execute Automated Test Suite
+        run: |
+          if [ -d tests ]; then
+            npx vitest run --passWithNoTests
+          fi
