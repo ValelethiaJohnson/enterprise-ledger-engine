@@ -1,0 +1,56 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+enum LedgerDirection {
+  DEBIT
+  CREDIT
+}
+
+model LedgerAccount {
+  id           String      @id @default(uuid()) @db.Uuid
+  accountCode  String      @unique @map("account_code") @db.VarChar(64)
+  accountType  AccountType @map("account_type")
+  currency     String      @db.Char(3)
+  balanceMinor BigInt      @default(0) @map("balance_minor")
+  version      Int         @default(1)
+  createdAt    DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  entries      ImmutableLedgerEntry[]
+
+  @@index([accountCode, currency], name: "idx_ledger_account_lookup")
+  @@map("ledger_accounts")
+}
+
+model ImmutableLedgerEntry {
+  id                String          @id @default(uuid()) @db.Uuid
+  transactionId     String          @map("transaction_id") @db.Uuid
+  idempotencyKey    String          @unique @map("idempotency_key") @db.VarChar(128)
+  accountId         String          @map("account_id") @db.Uuid
+  direction         LedgerDirection
+  amountMinor       BigInt          @map("amount_minor")
+  currency          String          @db.Char(3)
+  previousHash      String          @map("previous_hash") @db.Char(64)
+  cryptographicHash String          @unique @map("cryptographic_hash") @db.Char(64)
+  createdAt         DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  account           LedgerAccount   @relation(fields: [accountId], references: [id], onDelete: Restrict)
+
+  @@index([transactionId], name: "idx_ledger_tx_id")
+  @@index([accountId, createdAt], name: "idx_ledger_account_history")
+  @@map("immutable_ledger_entries")
+}
