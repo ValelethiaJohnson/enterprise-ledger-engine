@@ -1,0 +1,39 @@
+version: '3.9'
+
+services:
+  postgres-ledger:
+    image: postgres:16-alpine
+    container_name: enterprise-ledger-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ledger_admin
+      POSTGRES_PASSWORD: ledger_secure_pass_123
+      POSTGRES_DB: enterprise_ledger_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - ledger_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ledger_admin -d enterprise_ledger_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis-lock:
+    image: redis:7-alpine
+    container_name: enterprise-ledger-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6380:6379"
+    volumes:
+      - ledger_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  ledger_pg_data:
+  ledger_redis_data:
