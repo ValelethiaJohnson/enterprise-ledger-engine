@@ -1,0 +1,15 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: ledger-quorum-network-partition
+  namespace: enterprise-ledger
+spec:
+  action: partition
+  mode: all
+  selector:
+    namespaces:
+      - enterprise-ledger
+    labelSelectors:
+      app: enterprise-ledger-engine
+  direction: both
+  duration: '2m'
