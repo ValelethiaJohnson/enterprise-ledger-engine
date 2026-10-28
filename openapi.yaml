@@ -1,0 +1,37 @@
+openapi: 3.1.0
+info:
+  title: Enterprise Immutable Ledger Engine API
+  version: 1.1.0
+  description: High-concurrency double-entry bookkeeping and cryptographic audit API.
+paths:
+  /api/v1/ledger/journals:
+    post:
+      summary: Append Balanced Double-Entry Journal
+      operationId: appendJournalEntry
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Journal entry committed and sealed into hash chain.
+        '409':
+          description: Idempotency key conflict or pessimistic lock timeout.
+        '422':
+          description: Unbalanced debit/credit legs rejected by zero-sum guard.
+  /api/v1/ledger/accounts/{accountId}/balance:
+    get:
+      summary: Query Point-in-Time Account Balance
+      operationId: getAccountBalance
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Aggregated shard balance and latest Merkle proof returned.
