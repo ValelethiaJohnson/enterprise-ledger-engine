@@ -1,0 +1,18 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: IOChaos
+metadata:
+  name: postgres-wal-fsync-latency
+  namespace: enterprise-ledger
+spec:
+  action: latency
+  mode: one
+  selector:
+    namespaces:
+      - enterprise-ledger
+    labelSelectors:
+      app: postgres-ledger-primary
+  volumePath: /var/lib/postgresql/data
+  path: '/var/lib/postgresql/data/pg_wal/*'
+  delay: '120ms'
+  percent: 50
+  duration: '5m'
