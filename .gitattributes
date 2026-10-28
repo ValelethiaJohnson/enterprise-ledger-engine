@@ -1,0 +1,4 @@
+* text=auto eol=lf
+*.js linguist-vendored
+Dockerfile linguist-vendored
+Makefile linguist-vendored
